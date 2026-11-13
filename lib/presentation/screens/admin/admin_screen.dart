@@ -32,8 +32,30 @@ enum AdminTab {
   final String createLabel;
 }
 
+typedef AdminTabBuilder = Widget Function(
+  AdminTab tab,
+  Stream<void> createRequests,
+);
+
+Widget adminTabFor(AdminTab tab, Stream<void> createRequests) => switch (tab) {
+  AdminTab.platos => PlatosTab(createRequests: createRequests),
+  AdminTab.categorias => CategoriasTab(createRequests: createRequests),
+  AdminTab.mesas => MesasTab(createRequests: createRequests),
+  AdminTab.personal => PersonalTab(createRequests: createRequests),
+  AdminTab.insumos => InsumosTab(createRequests: createRequests),
+  AdminTab.distribuidores => DistribuidoresTab(createRequests: createRequests),
+  AdminTab.clientes => ClientesTab(createRequests: createRequests),
+};
+
 class AdminScreen extends StatefulWidget {
-  const AdminScreen({super.key});
+  const AdminScreen({
+    super.key,
+    this.tabBuilder = adminTabFor,
+    this.metrics = const AdminMetrics(),
+  });
+
+  final AdminTabBuilder tabBuilder;
+  final Widget metrics;
 
   @override
   State<AdminScreen> createState() => _AdminScreenState();
@@ -56,18 +78,8 @@ class _AdminScreenState extends State<AdminScreen> {
     super.dispose();
   }
 
-  Widget _buildTab(AdminTab tab) {
-    final requests = _createRequests[tab]!;
-    return switch (tab) {
-      AdminTab.platos => PlatosTab(createRequests: requests),
-      AdminTab.categorias => CategoriasTab(createRequests: requests),
-      AdminTab.mesas => MesasTab(createRequests: requests),
-      AdminTab.personal => PersonalTab(createRequests: requests),
-      AdminTab.insumos => InsumosTab(createRequests: requests),
-      AdminTab.distribuidores => DistribuidoresTab(createRequests: requests),
-      AdminTab.clientes => ClientesTab(createRequests: requests),
-    };
-  }
+  Widget _buildTab(AdminTab tab) =>
+      widget.tabBuilder(tab, _createRequests[tab]!);
 
   @override
   Widget build(BuildContext context) {
@@ -85,7 +97,7 @@ class _AdminScreenState extends State<AdminScreen> {
               ),
             ],
           ),
-          const AdminMetrics(),
+          widget.metrics,
           AppSpacing.h32,
           _AdminTabBar(
             active: _active,

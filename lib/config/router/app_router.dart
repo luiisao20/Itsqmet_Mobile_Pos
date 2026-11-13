@@ -18,7 +18,25 @@ import 'package:itsqmet_mobile_pos/presentation/screens/mesas/mesas_screen.dart'
 import 'package:itsqmet_mobile_pos/presentation/screens/not_found/no_page_found_screen.dart';
 import 'package:material_ui/material_ui.dart';
 
-GoRouter createAppRouter({GetIt? locator, String? initialLocation}) {
+typedef ScreenBuilder = Widget Function(AppRoute route);
+
+Widget screenFor(AppRoute route) => switch (route) {
+  AppRoutes.home => const HomeScreen(),
+  AppRoutes.login => const LoginScreen(),
+  AppRoutes.register => const RegisterScreen(),
+  AppRoutes.clientePedidos => const ClientePedidosScreen(),
+  AppRoutes.mesas => const MesasScreen(),
+  AppRoutes.cocina => const CocinaScreen(),
+  AppRoutes.caja => const CajaScreen(),
+  AppRoutes.admin => const AdminScreen(),
+  _ => const NoPageFoundScreen(),
+};
+
+GoRouter createAppRouter({
+  GetIt? locator,
+  String? initialLocation,
+  ScreenBuilder screenBuilder = screenFor,
+}) {
   final services = locator ?? GetIt.instance;
 
   return GoRouter(
@@ -31,25 +49,17 @@ GoRouter createAppRouter({GetIt? locator, String? initialLocation}) {
       ShellRoute(
         builder: (context, state, child) => AppShell(child: child),
         routes: [
-          _route(AppRoutes.home, const HomeScreen()),
-          _route(AppRoutes.login, const LoginScreen()),
-          _route(AppRoutes.register, const RegisterScreen()),
-          _route(AppRoutes.clientePedidos, const ClientePedidosScreen()),
-          _route(AppRoutes.mesas, const MesasScreen()),
-          _route(AppRoutes.cocina, const CocinaScreen()),
-          _route(AppRoutes.caja, const CajaScreen()),
-          _route(AppRoutes.admin, const AdminScreen()),
-          _route(AppRoutes.notFound, const NoPageFoundScreen()),
+          for (final route in AppRoutes.all) _route(route, screenBuilder),
         ],
       ),
     ],
   );
 }
 
-GoRoute _route(AppRoute route, Widget screen) => GoRoute(
+GoRoute _route(AppRoute route, ScreenBuilder screenBuilder) => GoRoute(
   path: route.path,
   name: route.name,
-  builder: (context, state) => screen,
+  builder: (context, state) => screenBuilder(route),
 );
 
 FutureOr<String?> _redirect(GetIt services, GoRouterState state) {
