@@ -1,6 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:itsqmet_mobile_pos/presentation/screens/auth/login_screen.dart';
-import 'package:itsqmet_mobile_pos/presentation/screens/auth/register_screen.dart';
 import 'package:itsqmet_mobile_pos/presentation/screens/caja/caja_screen.dart';
 import 'package:itsqmet_mobile_pos/presentation/screens/cliente_pedidos/cliente_pedidos_screen.dart';
 import 'package:itsqmet_mobile_pos/presentation/screens/cocina/cocina_screen.dart';
@@ -14,18 +12,6 @@ import '../../helpers/pump_app.dart';
 
 void main() {
   final cases = <String, (Widget, String, String, IconData)>{
-    'LoginScreen': (
-      const LoginScreen(),
-      'Iniciar Sesión',
-      'Ingresa con tu cuenta de cliente o credenciales de personal',
-      Icons.lock_outline,
-    ),
-    'RegisterScreen': (
-      const RegisterScreen(),
-      'Registro de Cliente',
-      'Crea tu cuenta para realizar pedidos para llevar y gestionar tus facturas',
-      Icons.edit_note,
-    ),
     'HomeScreen': (
       const HomeScreen(),
       'Sabores Auténticos, Preparados al Momento.',
