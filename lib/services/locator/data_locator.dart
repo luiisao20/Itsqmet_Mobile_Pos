@@ -3,6 +3,7 @@ import 'package:get_it/get_it.dart';
 import 'package:itsqmet_mobile_pos/core/core.dart';
 import 'package:itsqmet_mobile_pos/data/domain/domain.dart';
 import 'package:itsqmet_mobile_pos/data/infrastructure/infrastructure.dart';
+import 'package:itsqmet_mobile_pos/services/realtime/realtime.dart';
 
 void registerDataDependencies(
   GetIt getIt, {
@@ -22,6 +23,7 @@ void registerDataDependencies(
       ),
     )
     ..registerLazySingleton<Dio>(() => getIt<ApiClient>().dio)
+    ..registerLazySingleton<RealtimeService>(StompRealtimeService.new)
     ..registerLazySingleton<AuthDatasource>(
       () => ApiAuthDatasource(getIt<Dio>()),
     )

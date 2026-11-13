@@ -5,6 +5,7 @@ import 'package:itsqmet_mobile_pos/core/core.dart';
 import 'package:itsqmet_mobile_pos/data/domain/domain.dart';
 import 'package:itsqmet_mobile_pos/data/infrastructure/infrastructure.dart';
 import 'package:itsqmet_mobile_pos/services/locator/data_locator.dart';
+import 'package:itsqmet_mobile_pos/services/realtime/realtime.dart';
 
 void main() {
   late GetIt getIt;
@@ -62,5 +63,13 @@ void main() {
 
   test('repositories are lazy singletons', () {
     expect(getIt<PedidoRepository>(), same(getIt<PedidoRepository>()));
+  });
+
+  test('registers one shared realtime service without connecting', () {
+    final realtime = getIt<RealtimeService>();
+
+    expect(realtime, isA<StompRealtimeService>());
+    expect(realtime, same(getIt<RealtimeService>()));
+    expect(realtime.isConnected, isFalse);
   });
 }

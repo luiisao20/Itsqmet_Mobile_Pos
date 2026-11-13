@@ -4,6 +4,7 @@ export 'package:itsqmet_mobile_pos/presentation/widgets/badges/status_badges.dar
 export 'package:itsqmet_mobile_pos/presentation/widgets/buttons/app_button.dart';
 export 'package:itsqmet_mobile_pos/presentation/widgets/buttons/app_link_button.dart';
 export 'package:itsqmet_mobile_pos/presentation/widgets/cards/app_card.dart';
+export 'package:itsqmet_mobile_pos/presentation/widgets/composite/composite.dart';
 export 'package:itsqmet_mobile_pos/presentation/widgets/feedback/empty_state.dart';
 export 'package:itsqmet_mobile_pos/presentation/widgets/feedback/error_banner.dart';
 export 'package:itsqmet_mobile_pos/presentation/widgets/feedback/loading_view.dart';
