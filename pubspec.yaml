@@ -1,5 +1,5 @@
 name: itsqmet_mobile_pos
-description: "A new Flutter project."
+description: "Restaurante POS - app móvil"
 publish_to: "none"
 version: 0.1.0+1
 
@@ -18,18 +18,23 @@ dependencies:
   go_router: ^18.1.4
   flutter_bloc: ^9.1.1
   flutter_dotenv: ^6.0.1
-  socket_io_client: ^3.1.6
   shared_preferences: ^2.5.6
   cached_network_image: ^4.0.7
   flutter_secure_storage: ^11.2.0
+  stomp_dart_client: ^3.0.1
+  audioplayers: ^6.8.1
+  material_ui: ^1.11.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+  mocktail: ^1.0.5
+  bloc_test: ^10.0.0
 
 flutter:
   uses-material-design: true
 
   assets:
     - .env
+    - assets/sounds/

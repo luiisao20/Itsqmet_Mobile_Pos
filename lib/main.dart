@@ -1,16 +1,18 @@
-import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:itsqmet_mobile_pos/app.dart';
+import 'package:itsqmet_mobile_pos/services/locator/service_locator.dart';
+import 'package:material_ui/material_ui.dart';
 
-void main() {
-  runApp(const MainApp());
-}
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
 
-class MainApp extends StatelessWidget {
-  const MainApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(body: Center(child: Text('Hello World!'))),
-    );
+  try {
+    await dotenv.load(isOptional: true);
+  } catch (error) {
+    debugPrint('dotenv could not be loaded, using defaults: $error');
   }
+
+  await setupLocator();
+
+  runApp(const App());
 }

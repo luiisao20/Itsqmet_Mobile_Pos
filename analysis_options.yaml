@@ -5,3 +5,11 @@ analyzer:
     - build/**
     - android/**
     - ios/**
+    - "**/*.g.dart"
+
+linter:
+  rules:
+    prefer_const_constructors: true
+    prefer_final_locals: true
+    always_use_package_imports: true
+    avoid_print: true

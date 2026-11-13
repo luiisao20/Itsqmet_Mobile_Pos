@@ -35,6 +35,7 @@ migrate_working_dir/
 *.atl
 *odd
 
+
 # Symbolication related
 app.*.symbols
 
