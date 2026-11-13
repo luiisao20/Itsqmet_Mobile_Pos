@@ -189,6 +189,68 @@ void main() {
       await expectLater(service.disconnect(), completes);
     });
 
+    test(
+      'one user disconnecting keeps the connection of another user',
+      () async {
+        service
+          ..connect()
+          ..connect();
+        client().simulateConnect();
+        final received = <Pedido>[];
+        final subscription = service.cocina.listen(received.add);
+        addTearDown(subscription.cancel);
+
+        await service.disconnect();
+        client().emit('/topic/cocina', jsonEncode(pedidoJson(id: 11)));
+        await Future<void>.delayed(Duration.zero);
+
+        expect(client().deactivateCalls, 0);
+        expect(service.isConnected, isTrue);
+        expect(received.map((p) => p.id), [11]);
+      },
+    );
+
+    test('the last user disconnecting closes the connection', () async {
+      service
+        ..connect()
+        ..connect();
+      client().simulateConnect();
+      final done = expectLater(service.cocina, emitsDone);
+
+      await service.disconnect();
+      await service.disconnect();
+
+      await done;
+      expect(client().deactivateCalls, 1);
+      expect(service.isConnected, isFalse);
+    });
+
+    test('late callbacks from a replaced client are ignored', () async {
+      service.connect();
+      final old = client()..simulateConnect();
+      await service.disconnect();
+      service.connect();
+      client().simulateConnect();
+
+      old.simulateDrop();
+      service.watch(RealtimeTopics.cocina);
+
+      expect(service.isConnected, isTrue);
+      expect(client().subscribeCalls, contains('/topic/cocina'));
+    });
+
+    test('extra disconnects never leave a negative user count', () async {
+      service.connect();
+      await service.disconnect();
+      await service.disconnect();
+
+      service.connect();
+      await service.disconnect();
+
+      expect(clients, hasLength(2));
+      expect(clients.last.deactivateCalls, 1);
+    });
+
     test('connect after disconnect creates a new client', () async {
       service.connect();
       await service.disconnect();

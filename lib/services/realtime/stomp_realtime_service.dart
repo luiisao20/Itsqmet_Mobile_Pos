@@ -19,6 +19,8 @@ class StompRealtimeService extends RealtimeService {
   final String? url;
   final StompClientFactory _clientFactory;
   final Map<String, StreamController<Pedido>> _controllers = {};
+  int _users = 0;
+  int _generation = 0;
   final Map<String, StompUnsubscribe> _subscriptions = {};
 
   StompClientAdapter? _client;
@@ -29,17 +31,28 @@ class StompRealtimeService extends RealtimeService {
 
   @override
   void connect() {
+    _users++;
     if (_client != null) return;
+    final generation = ++_generation;
+    bool current() => generation == _generation;
     final client = _clientFactory(
       StompConfig(
         url: url ?? AppEnvironment.wsUrl,
         reconnectDelay: reconnectDelay,
         heartbeatIncoming: heartbeat,
         heartbeatOutgoing: heartbeat,
-        onConnect: _onConnect,
-        onDisconnect: (_) => _onConnectionLost(),
-        onWebSocketDone: _onConnectionLost,
-        onWebSocketError: (_) => _onConnectionLost(),
+        onConnect: (frame) {
+          if (current()) _onConnect(frame);
+        },
+        onDisconnect: (_) {
+          if (current()) _onConnectionLost();
+        },
+        onWebSocketDone: () {
+          if (current()) _onConnectionLost();
+        },
+        onWebSocketError: (_) {
+          if (current()) _onConnectionLost();
+        },
       ),
     );
     _client = client;
@@ -48,6 +61,8 @@ class StompRealtimeService extends RealtimeService {
 
   @override
   Future<void> disconnect() async {
+    if (_users > 0) _users--;
+    if (_users > 0) return;
     final client = _client;
     if (client != null && _connected) {
       for (final unsubscribe in _subscriptions.values) {
