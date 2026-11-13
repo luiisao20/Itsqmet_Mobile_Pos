@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
-import 'package:itsqmet_mobile_pos/config/router/app_router.dart';
+import 'package:itsqmet_mobile_pos/config/router/router.dart';
 import 'package:itsqmet_mobile_pos/config/theme/theme.dart';
 import 'package:itsqmet_mobile_pos/core/session/session_expired_notifier.dart';
 import 'package:itsqmet_mobile_pos/core/storage/in_memory_session_storage.dart';
@@ -53,6 +53,7 @@ extension PumpAuthRouterX on WidgetTester {
     final router = createAppRouter(
       locator: GetIt.instance,
       initialLocation: initialLocation,
+      screenBuilder: authScreenBuilder,
     );
     addTearDown(router.dispose);
     await pumpWidget(
@@ -67,6 +68,11 @@ extension PumpAuthRouterX on WidgetTester {
     text,
   );
 }
+
+Widget authScreenBuilder(AppRoute route) =>
+    route == AppRoutes.login || route == AppRoutes.register
+    ? screenFor(route)
+    : SizedBox(key: ValueKey('screen:${route.name}'));
 
 String currentPath(GoRouter router) =>
     router.routerDelegate.currentConfiguration.uri.path;

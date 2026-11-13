@@ -91,10 +91,12 @@ class CocinaCubit extends Cubit<CocinaState> {
 
   @override
   Future<void> close() async {
+    final connected = _subscriptions.isNotEmpty;
     for (final subscription in _subscriptions) {
       await subscription.cancel();
     }
     _subscriptions.clear();
+    if (connected) await _realtime.disconnect();
     return super.close();
   }
 }

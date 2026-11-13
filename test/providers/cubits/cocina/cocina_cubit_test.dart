@@ -118,15 +118,22 @@ void main() {
       expect: () => [const CocinaState(loading: true), const CocinaState()],
     );
 
-    test('connects the realtime service and never disconnects it', () async {
+    test('connects once and releases its connection on close', () async {
       when(() => repository.getPedidos(page: 0, size: 50))
           .thenAnswer((_) async => _page([]));
       final cubit = build();
 
       await cubit.load();
+      await cubit.load();
       await cubit.close();
 
       expect(realtime.connectCalls, 1);
+      expect(realtime.disconnectCalls, 1);
+    });
+
+    test('closing without loading never disconnects', () async {
+      await build().close();
+
       expect(realtime.disconnectCalls, 0);
     });
   });
