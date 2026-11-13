@@ -1,0 +1,9 @@
+export 'package:itsqmet_mobile_pos/data/domain/repositories/auth_repository.dart';
+export 'package:itsqmet_mobile_pos/data/domain/repositories/catalogo_repository.dart';
+export 'package:itsqmet_mobile_pos/data/domain/repositories/cliente_repository.dart';
+export 'package:itsqmet_mobile_pos/data/domain/repositories/distribuidor_repository.dart';
+export 'package:itsqmet_mobile_pos/data/domain/repositories/factura_repository.dart';
+export 'package:itsqmet_mobile_pos/data/domain/repositories/insumo_repository.dart';
+export 'package:itsqmet_mobile_pos/data/domain/repositories/mesa_repository.dart';
+export 'package:itsqmet_mobile_pos/data/domain/repositories/pedido_repository.dart';
+export 'package:itsqmet_mobile_pos/data/domain/repositories/usuario_repository.dart';
