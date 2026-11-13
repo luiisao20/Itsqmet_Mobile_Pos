@@ -45,11 +45,15 @@ void main() {
 
   tearDown(() => services.reset());
 
+  Finder screen(AppRoute route) => find.byKey(ValueKey('screen:${route.name}'));
+
   Future<GoRouter> pumpRouter(WidgetTester tester, String location) async {
     tester.setScreenSize(TestScreens.phone);
     final router = createAppRouter(
       locator: services,
       initialLocation: location,
+      screenBuilder: (route) =>
+          Text(route.path, key: ValueKey('screen:${route.name}')),
     );
     addTearDown(router.dispose);
     await tester.pumpWidget(
@@ -76,17 +80,17 @@ void main() {
   });
 
   for (final entry in expectedScreens.entries) {
-    testWidgets('${entry.key.path} builds ${entry.value} inside AppShell', (
+    test('screenFor maps ${entry.key.path} to ${entry.value}', () {
+      expect(screenFor(entry.key).runtimeType, entry.value);
+    });
+
+    testWidgets('${entry.key.path} renders its screen inside AppShell', (
       tester,
     ) async {
       await pumpRouter(tester, entry.key.path);
 
-      expect(find.byType(entry.value), findsOneWidget);
       expect(
-        find.descendant(
-          of: find.byType(AppShell),
-          matching: find.byType(entry.value),
-        ),
+        find.descendant(of: find.byType(AppShell), matching: screen(entry.key)),
         findsOneWidget,
       );
     });
@@ -98,7 +102,7 @@ void main() {
     router.goNamed(AppRoutes.caja.name);
     await tester.pumpAndSettle();
 
-    expect(find.byType(CajaScreen), findsOneWidget);
+    expect(screen(AppRoutes.caja), findsOneWidget);
   });
 
   testWidgets('an unknown path shows NoPageFoundScreen inside AppShell', (
@@ -124,7 +128,7 @@ void main() {
     await tester.tap(find.text('Volver al Menú'));
     await tester.pumpAndSettle();
 
-    expect(find.byType(HomeScreen), findsOneWidget);
+    expect(screen(AppRoutes.home), findsOneWidget);
     expect(find.byType(NoPageFoundScreen), findsNothing);
   });
 
@@ -136,8 +140,8 @@ void main() {
 
     await pumpRouter(tester, AppRoutes.admin.path);
 
-    expect(find.byType(LoginScreen), findsOneWidget);
-    expect(find.byType(AdminScreen), findsNothing);
+    expect(screen(AppRoutes.login), findsOneWidget);
+    expect(screen(AppRoutes.admin), findsNothing);
     final adminRequest = guard.requests.firstWhere(
       (r) => r.path == AppRoutes.admin.path,
     );
@@ -164,7 +168,7 @@ void main() {
 
     await pumpRouter(tester, AppRoutes.admin.path);
 
-    expect(find.byType(RegisterScreen), findsOneWidget);
+    expect(screen(AppRoutes.register), findsOneWidget);
   });
 
   testWidgets('a redirect to the current location is ignored', (tester) async {
@@ -172,7 +176,7 @@ void main() {
 
     await pumpRouter(tester, AppRoutes.admin.path);
 
-    expect(find.byType(AdminScreen), findsOneWidget);
+    expect(screen(AppRoutes.admin), findsOneWidget);
   });
 
   testWidgets('RouterRefreshNotifier.notify re-evaluates the guard', (
@@ -181,26 +185,26 @@ void main() {
     final guard = _FakeGuard();
     overrideRouteGuard(services, () => guard);
     await pumpRouter(tester, AppRoutes.admin.path);
-    expect(find.byType(AdminScreen), findsOneWidget);
+    expect(screen(AppRoutes.admin), findsOneWidget);
 
     guard.target = AppRoutes.login.path;
     services<RouterRefreshNotifier>().notify();
     await tester.pumpAndSettle();
 
-    expect(find.byType(LoginScreen), findsOneWidget);
-    expect(find.byType(AdminScreen), findsNothing);
+    expect(screen(AppRoutes.login), findsOneWidget);
+    expect(screen(AppRoutes.admin), findsNothing);
   });
 
   testWidgets('a guard overridden after the router was created is used', (
     tester,
   ) async {
     await pumpRouter(tester, AppRoutes.admin.path);
-    expect(find.byType(AdminScreen), findsOneWidget);
+    expect(screen(AppRoutes.admin), findsOneWidget);
 
     overrideRouteGuard(services, () => _FakeGuard(target: '/login'));
     services<RouterRefreshNotifier>().notify();
     await tester.pumpAndSettle();
 
-    expect(find.byType(LoginScreen), findsOneWidget);
+    expect(screen(AppRoutes.login), findsOneWidget);
   });
 }

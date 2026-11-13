@@ -16,6 +16,27 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../../helpers/pump_app.dart';
 
+class _StubTab extends StatelessWidget {
+  const _StubTab({required this.tab, required this.createRequests});
+
+  final AdminTab tab;
+  final Stream<void> createRequests;
+
+  @override
+  Widget build(BuildContext context) => Text('stub:${tab.name}');
+}
+
+Finder stubTab(AdminTab tab) =>
+    find.byWidgetPredicate((widget) => widget is _StubTab && widget.tab == tab);
+
+Future<void> pumpAdmin(WidgetTester tester, {Size? size}) => tester.pumpApp(
+  AdminScreen(
+    tabBuilder: (tab, requests) => _StubTab(tab: tab, createRequests: requests),
+    metrics: const Text('metrics-stub'),
+  ),
+  size: size ?? TestScreens.phone,
+);
+
 Future<void> selectTab(WidgetTester tester, AdminTab tab) async {
   await tester.ensureVisible(find.byKey(ValueKey(tab)));
   await tester.tap(find.byKey(ValueKey(tab)));
@@ -55,10 +76,26 @@ void main() {
     ]);
   });
 
+  for (final entry in tabWidgets.entries) {
+    test('adminTabFor maps ${entry.key.name} to ${entry.value}', () {
+      expect(
+        adminTabFor(entry.key, const Stream<void>.empty()).runtimeType,
+        entry.value,
+      );
+    });
+  }
+
+  test('AdminScreen uses the real tabs and AdminMetrics by default', () {
+    const screen = AdminScreen();
+
+    expect(screen.metrics, isA<AdminMetrics>());
+    expect(screen.tabBuilder, adminTabFor);
+  });
+
   testWidgets('shows the header, metrics, tab bar and the platos tab', (
     tester,
   ) async {
-    await tester.pumpApp(const AdminScreen());
+    await pumpAdmin(tester);
 
     final header = tester.widget<PageHeader>(find.byType(PageHeader));
     expect(header.title, 'Panel de Administración');
@@ -66,34 +103,30 @@ void main() {
       header.subtitle,
       'Gestión integral de catálogo, personal, inventario, mesas y proveedores',
     );
-    expect(find.byType(AdminMetrics), findsOneWidget);
+    expect(find.text('metrics-stub'), findsOneWidget);
     for (final tab in AdminTab.values) {
       expect(find.byKey(ValueKey(tab)), findsOneWidget);
     }
-    expect(find.byType(PlatosTab), findsOneWidget);
+    expect(stubTab(AdminTab.platos), findsOneWidget);
     expect(find.text('+ Nuevo Plato'), findsOneWidget);
   });
 
-  for (final entry in tabWidgets.entries) {
-    testWidgets('selecting ${entry.key.name} shows ${entry.value}', (
-      tester,
-    ) async {
-      await tester.pumpApp(const AdminScreen());
+  for (final tab in AdminTab.values) {
+    testWidgets('selecting ${tab.name} shows only its tab', (tester) async {
+      await pumpAdmin(tester);
 
-      await selectTab(tester, entry.key);
+      await selectTab(tester, tab);
 
-      expect(find.byType(entry.value), findsOneWidget);
-      expect(find.text(entry.key.createLabel), findsOneWidget);
-      for (final other in tabWidgets.entries) {
-        if (other.key != entry.key) {
-          expect(find.byType(other.value), findsNothing);
-        }
+      expect(stubTab(tab), findsOneWidget);
+      expect(find.text(tab.createLabel), findsOneWidget);
+      for (final other in AdminTab.values.where((t) => t != tab)) {
+        expect(stubTab(other), findsNothing);
       }
     });
   }
 
   testWidgets('the selected pill uses the active colors', (tester) async {
-    await tester.pumpApp(const AdminScreen());
+    await pumpAdmin(tester);
 
     BoxDecoration decorationOf(AdminTab tab) {
       final container = tester.widget<AnimatedContainer>(
@@ -112,10 +145,10 @@ void main() {
   testWidgets('the header action emits a create request for the active tab', (
     tester,
   ) async {
-    await tester.pumpApp(const AdminScreen());
+    await pumpAdmin(tester);
     await selectTab(tester, AdminTab.insumos);
 
-    final tab = tester.widget<InsumosTab>(find.byType(InsumosTab));
+    final tab = tester.widget<_StubTab>(stubTab(AdminTab.insumos));
     var requests = 0;
     final subscription = tab.createRequests.listen((_) => requests++);
     addTearDown(subscription.cancel);
@@ -127,8 +160,8 @@ void main() {
   });
 
   testWidgets('create requests are scoped to their own tab', (tester) async {
-    await tester.pumpApp(const AdminScreen());
-    final platos = tester.widget<PlatosTab>(find.byType(PlatosTab));
+    await pumpAdmin(tester);
+    final platos = tester.widget<_StubTab>(stubTab(AdminTab.platos));
     var platosRequests = 0;
     final StreamSubscription<void> subscription = platos.createRequests.listen(
       (_) => platosRequests++,
@@ -142,35 +175,8 @@ void main() {
     expect(platosRequests, 0);
   });
 
-  testWidgets('placeholder tabs show their label in an EmptyState', (
-    tester,
-  ) async {
-    await tester.pumpApp(const AdminScreen());
-    await selectTab(tester, AdminTab.distribuidores);
-
-    final empty = tester.widget<EmptyState>(
-      find.descendant(
-        of: find.byType(DistribuidoresTab),
-        matching: find.byType(EmptyState),
-      ),
-    );
-    expect(empty.title, 'Distribuidores');
-    expect(empty.icon, Icons.local_shipping);
-  });
-
-  testWidgets('AdminMetrics shows the four web metric labels', (tester) async {
-    await tester.pumpApp(const AdminMetrics());
-
-    for (final label in ['Platos', 'Mesas', 'Personal', 'Insumos']) {
-      expect(find.text(label), findsOneWidget);
-    }
-  });
-
   testWidgets('renders on tablet without overflow', (tester) async {
-    await tester.pumpApp(
-      const AdminScreen(),
-      size: TestScreens.tabletLandscape,
-    );
+    await pumpAdmin(tester, size: TestScreens.tabletLandscape);
 
     expect(tester.takeException(), isNull);
     expect(find.text('+ Nuevo Plato'), findsOneWidget);

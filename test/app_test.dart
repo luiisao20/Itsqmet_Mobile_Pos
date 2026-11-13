@@ -4,12 +4,16 @@ import 'package:go_router/go_router.dart';
 import 'package:itsqmet_mobile_pos/app.dart';
 import 'package:itsqmet_mobile_pos/config/router/router.dart';
 import 'package:itsqmet_mobile_pos/config/theme/theme.dart';
-import 'package:itsqmet_mobile_pos/presentation/screens/home/home_screen.dart';
 import 'package:itsqmet_mobile_pos/services/locator/router_locator.dart';
 import 'package:itsqmet_mobile_pos/services/notifications_service.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'helpers/pump_app.dart';
+
+class _RedirectAllGuard implements RouteGuard {
+  @override
+  String? redirect(RouteRequest request) => AppRoutes.notFound.path;
+}
 
 void main() {
   late GetIt services;
@@ -18,7 +22,11 @@ void main() {
   setUp(() {
     services = GetIt.asNewInstance();
     registerRouterDependencies(services);
-    router = createAppRouter(locator: services);
+    router = createAppRouter(
+      locator: services,
+      screenBuilder: (route) =>
+          Text(route.path, key: ValueKey('screen:${route.name}')),
+    );
   });
 
   tearDown(() {
@@ -42,7 +50,7 @@ void main() {
     expect(app.scaffoldMessengerKey, NotificationsService.messengerKey);
     expect(app.routerConfig, same(router));
     expect(find.text('RESTAURANTEPOS'), findsOneWidget);
-    expect(find.byType(HomeScreen), findsOneWidget);
+    expect(find.byKey(const ValueKey('screen:home')), findsOneWidget);
   });
 
   testWidgets('App without a router builds one from the GetIt instance', (
@@ -50,12 +58,13 @@ void main() {
   ) async {
     tester.setScreenSize(TestScreens.phone);
     registerRouterDependencies(GetIt.instance);
+    overrideRouteGuard(GetIt.instance, _RedirectAllGuard.new);
     addTearDown(GetIt.instance.reset);
 
     await tester.pumpWidget(const App());
     await tester.pumpAndSettle();
 
-    expect(find.byType(HomeScreen), findsOneWidget);
+    expect(find.text('Página No Encontrada'), findsOneWidget);
 
     await tester.pumpWidget(const SizedBox.shrink());
   });
@@ -64,10 +73,13 @@ void main() {
     tester.setScreenSize(TestScreens.phone);
     await tester.pumpWidget(App(router: router));
 
-    router.go(AppRoutes.notFound.path);
+    router.go(AppRoutes.caja.path);
     await tester.pumpAndSettle();
 
-    expect(find.text('Página No Encontrada'), findsOneWidget);
+    expect(
+      find.byKey(ValueKey('screen:${AppRoutes.caja.name}')),
+      findsOneWidget,
+    );
   });
 
   testWidgets('notifications are shown through the app messenger key', (
