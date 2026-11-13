@@ -1,20 +1,35 @@
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:itsqmet_mobile_pos/config/responsive/responsive.dart';
 import 'package:itsqmet_mobile_pos/config/theme/theme.dart';
+import 'package:itsqmet_mobile_pos/providers/cubits/admin_catalogo/admin_catalogo.dart';
+import 'package:itsqmet_mobile_pos/services/locator/service_locator.dart';
 import 'package:material_ui/material_ui.dart';
 
 class AdminMetrics extends StatelessWidget {
   const AdminMetrics({super.key});
 
-  static const List<(IconData, String)> _metrics = [
-    (Icons.restaurant_menu, 'Platos'),
-    (Icons.table_restaurant, 'Mesas'),
-    (Icons.groups, 'Personal'),
-    (Icons.inventory_2, 'Insumos'),
-  ];
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider<AdminMetricsCubit>(
+      create: (_) => getIt<AdminMetricsCubit>()..load(),
+      child: const AdminMetricsView(),
+    );
+  }
+}
+
+class AdminMetricsView extends StatelessWidget {
+  const AdminMetricsView({super.key});
 
   @override
   Widget build(BuildContext context) {
     final columns = context.atLeastSm ? 4 : 2;
+    final state = context.watch<AdminMetricsCubit>().state;
+    final metrics = [
+      (Icons.restaurant_menu, 'Platos', state.platos),
+      (Icons.table_restaurant, 'Mesas', state.mesas),
+      (Icons.groups, 'Personal', state.personal),
+      (Icons.inventory_2, 'Insumos', state.insumos),
+    ];
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -26,10 +41,10 @@ class AdminMetrics extends StatelessWidget {
           spacing: gap,
           runSpacing: gap,
           children: [
-            for (final (icon, label) in _metrics)
+            for (final (icon, label, value) in metrics)
               SizedBox(
                 width: itemWidth,
-                child: _MetricCard(icon: icon, label: label, value: '0'),
+                child: _MetricCard(icon: icon, label: label, value: '$value'),
               ),
           ],
         );
