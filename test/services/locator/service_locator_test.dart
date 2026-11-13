@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
+import 'package:itsqmet_mobile_pos/config/router/route_guard_auth.dart';
 import 'package:itsqmet_mobile_pos/config/router/router.dart';
 import 'package:itsqmet_mobile_pos/data/domain/domain.dart';
 import 'package:itsqmet_mobile_pos/services/locator/admin_catalogo_locator.dart';
@@ -32,7 +33,7 @@ void main() {
 
     expect(services.isRegistered<AuthRepository>(), isTrue);
     expect(services.isRegistered<PedidoRepository>(), isTrue);
-    expect(services<RouteGuard>(), isA<AllowAllRouteGuard>());
+    expect(services<RouteGuard>(), isA<AuthRouteGuard>());
     expect(services<RouterRefreshNotifier>(), isA<RouterRefreshNotifier>());
     expect(
       services<RouterRefreshNotifier>(),
@@ -42,7 +43,7 @@ void main() {
 
   test('a later registration overrides the default guard', () async {
     await setupLocator(services);
-    expect(services<RouteGuard>(), isA<AllowAllRouteGuard>());
+    expect(services<RouteGuard>(), isA<AuthRouteGuard>());
 
     overrideRouteGuard(services, _DenyAllGuard.new);
 
