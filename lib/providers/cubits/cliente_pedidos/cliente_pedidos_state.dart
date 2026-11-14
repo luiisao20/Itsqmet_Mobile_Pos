@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:itsqmet_mobile_pos/data/domain/domain.dart';
 
-enum ClienteTab { nuevo, historial, facturas }
+enum ClienteTab { nuevo, paquetes, historial, facturas }
 
 class ClientePedidosError extends Equatable {
   const ClientePedidosError(this.id, this.message);
@@ -26,6 +26,9 @@ class ClientePedidosState extends Equatable {
     this.misPedidos = const [],
     this.misFacturas = const [],
     this.loadingList = false,
+    this.paquetes = const [],
+    this.loadingPaquetes = false,
+    this.rescatandoPaqueteId,
     this.error,
   });
 
@@ -40,6 +43,9 @@ class ClientePedidosState extends Equatable {
   final List<Pedido> misPedidos;
   final List<Factura> misFacturas;
   final bool loadingList;
+  final List<PaqueteSorpresa> paquetes;
+  final bool loadingPaquetes;
+  final int? rescatandoPaqueteId;
   final ClientePedidosError? error;
 
   ClientePedidosState copyWith({
@@ -54,6 +60,9 @@ class ClientePedidosState extends Equatable {
     List<Pedido>? misPedidos,
     List<Factura>? misFacturas,
     bool? loadingList,
+    List<PaqueteSorpresa>? paquetes,
+    bool? loadingPaquetes,
+    int? Function()? rescatandoPaqueteId,
     ClientePedidosError? error,
   }) {
     return ClientePedidosState(
@@ -72,6 +81,11 @@ class ClientePedidosState extends Equatable {
       misPedidos: misPedidos ?? this.misPedidos,
       misFacturas: misFacturas ?? this.misFacturas,
       loadingList: loadingList ?? this.loadingList,
+      paquetes: paquetes ?? this.paquetes,
+      loadingPaquetes: loadingPaquetes ?? this.loadingPaquetes,
+      rescatandoPaqueteId: rescatandoPaqueteId == null
+          ? this.rescatandoPaqueteId
+          : rescatandoPaqueteId(),
       error: error ?? this.error,
     );
   }
@@ -89,6 +103,9 @@ class ClientePedidosState extends Equatable {
     misPedidos,
     misFacturas,
     loadingList,
+    paquetes,
+    loadingPaquetes,
+    rescatandoPaqueteId,
     error,
   ];
 }

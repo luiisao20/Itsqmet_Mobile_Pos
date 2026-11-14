@@ -3,6 +3,7 @@ import 'package:itsqmet_mobile_pos/config/theme/theme.dart';
 import 'package:itsqmet_mobile_pos/presentation/screens/cliente_pedidos/widgets/mis_facturas_tab.dart';
 import 'package:itsqmet_mobile_pos/presentation/screens/cliente_pedidos/widgets/mis_pedidos_tab.dart';
 import 'package:itsqmet_mobile_pos/presentation/screens/cliente_pedidos/widgets/nuevo_pedido_tab.dart';
+import 'package:itsqmet_mobile_pos/presentation/screens/cliente_pedidos/widgets/paquetes_sorpresa_tab.dart';
 import 'package:itsqmet_mobile_pos/presentation/widgets/composite/segmented_tabs.dart';
 import 'package:itsqmet_mobile_pos/presentation/widgets/feedback/success_banner.dart';
 import 'package:itsqmet_mobile_pos/presentation/widgets/layout/page_container.dart';
@@ -53,6 +54,11 @@ class ClientePedidosView extends StatelessWidget {
                 ],
                 switch (state.tab) {
                   ClienteTab.nuevo => NuevoPedidoTab(state: state),
+                  ClienteTab.paquetes => PaquetesSorpresaTab(
+                    loading: state.loadingPaquetes,
+                    paquetes: state.paquetes,
+                    rescatandoId: state.rescatandoPaqueteId,
+                  ),
                   ClienteTab.historial => MisPedidosTab(
                     loading: state.loadingList,
                     pedidos: state.misPedidos,
@@ -92,6 +98,11 @@ class _Header extends StatelessWidget {
           value: ClienteTab.nuevo,
           label: 'Nuevo Pedido (Llevar)',
           icon: Icons.shopping_bag_outlined,
+        ),
+        const SegmentedTabItem(
+          value: ClienteTab.paquetes,
+          label: 'Salva Comida',
+          icon: Icons.eco_outlined,
         ),
         SegmentedTabItem(
           value: ClienteTab.historial,

@@ -6,4 +6,5 @@ export 'package:itsqmet_mobile_pos/data/domain/datasources/factura_datasource.da
 export 'package:itsqmet_mobile_pos/data/domain/datasources/insumo_datasource.dart';
 export 'package:itsqmet_mobile_pos/data/domain/datasources/mesa_datasource.dart';
 export 'package:itsqmet_mobile_pos/data/domain/datasources/pedido_datasource.dart';
+export 'package:itsqmet_mobile_pos/data/domain/datasources/paquete_sorpresa_datasource.dart';
 export 'package:itsqmet_mobile_pos/data/domain/datasources/usuario_datasource.dart';

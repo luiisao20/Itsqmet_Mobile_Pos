@@ -7,6 +7,7 @@ export 'package:itsqmet_mobile_pos/data/infrastructure/mappers/factura_mapper.da
 export 'package:itsqmet_mobile_pos/data/infrastructure/mappers/insumo_mapper.dart';
 export 'package:itsqmet_mobile_pos/data/infrastructure/mappers/mesa_mapper.dart';
 export 'package:itsqmet_mobile_pos/data/infrastructure/mappers/pago_mapper.dart';
+export 'package:itsqmet_mobile_pos/data/infrastructure/mappers/paquete_sorpresa_mapper.dart';
 export 'package:itsqmet_mobile_pos/data/infrastructure/mappers/pedido_mapper.dart';
 export 'package:itsqmet_mobile_pos/data/infrastructure/mappers/plato_mapper.dart';
 export 'package:itsqmet_mobile_pos/data/infrastructure/mappers/usuario_mapper.dart';

@@ -12,6 +12,8 @@ class _MockPedidos extends Mock implements PedidoRepository {}
 
 class _MockFacturas extends Mock implements FacturaRepository {}
 
+class _MockPaquetes extends Mock implements PaqueteSorpresaRepository {}
+
 class _MockRealtime extends Mock implements RealtimeService {}
 
 void main() {
@@ -20,6 +22,7 @@ void main() {
       ..registerSingleton<CatalogoRepository>(_MockCatalogo())
       ..registerSingleton<PedidoRepository>(_MockPedidos())
       ..registerSingleton<FacturaRepository>(_MockFacturas())
+      ..registerSingleton<PaqueteSorpresaRepository>(_MockPaquetes())
       ..registerSingleton<RealtimeService>(_MockRealtime());
     registerClientePedidosDependencies(getIt);
 

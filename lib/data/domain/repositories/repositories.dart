@@ -6,4 +6,5 @@ export 'package:itsqmet_mobile_pos/data/domain/repositories/factura_repository.d
 export 'package:itsqmet_mobile_pos/data/domain/repositories/insumo_repository.dart';
 export 'package:itsqmet_mobile_pos/data/domain/repositories/mesa_repository.dart';
 export 'package:itsqmet_mobile_pos/data/domain/repositories/pedido_repository.dart';
+export 'package:itsqmet_mobile_pos/data/domain/repositories/paquete_sorpresa_repository.dart';
 export 'package:itsqmet_mobile_pos/data/domain/repositories/usuario_repository.dart';

@@ -51,6 +51,9 @@ void registerDataDependencies(
     ..registerLazySingleton<DistribuidorDatasource>(
       () => ApiDistribuidorDatasource(getIt<Dio>()),
     )
+    ..registerLazySingleton<PaqueteSorpresaDatasource>(
+      () => ApiPaqueteSorpresaDatasource(getIt<Dio>()),
+    )
     ..registerLazySingleton<AuthRepository>(
       () => AuthRepositoryImpl(getIt<AuthDatasource>()),
     )
@@ -77,5 +80,8 @@ void registerDataDependencies(
     )
     ..registerLazySingleton<DistribuidorRepository>(
       () => DistribuidorRepositoryImpl(getIt<DistribuidorDatasource>()),
+    )
+    ..registerLazySingleton<PaqueteSorpresaRepository>(
+      () => PaqueteSorpresaRepositoryImpl(getIt<PaqueteSorpresaDatasource>()),
     );
 }

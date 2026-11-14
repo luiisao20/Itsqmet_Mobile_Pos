@@ -13,8 +13,12 @@ class _MockPedidos extends Mock implements PedidoRepository {}
 
 class _MockFacturas extends Mock implements FacturaRepository {}
 
-class _FakeRealtime implements RealtimeService {
+class _MockPaquetes extends Mock implements PaqueteSorpresaRepository {}
+
+class _FakeRealtime extends RealtimeService {
   final StreamController<Pedido> controller = StreamController.broadcast();
+  final StreamController<PaqueteSorpresa> paqueteController =
+      StreamController.broadcast();
   int connectCalls = 0;
   int disconnectCalls = 0;
 
@@ -37,6 +41,15 @@ class _FakeRealtime implements RealtimeService {
 
   @override
   Stream<Pedido> get cocina => watch(RealtimeTopics.cocina);
+
+  @override
+  Stream<PaqueteSorpresa> watchPaquetes([
+    String topic = RealtimeTopics.paquetesSorpresa,
+  ]) => paqueteController.stream;
+
+  @override
+  Stream<PaqueteSorpresa> get paquetesSorpresa =>
+      watchPaquetes(RealtimeTopics.paquetesSorpresa);
 }
 
 Plato _plato(int id, {double precio = 10}) => Plato(
@@ -72,6 +85,7 @@ void main() {
   late _MockCatalogo catalogo;
   late _MockPedidos pedidos;
   late _MockFacturas facturas;
+  late _MockPaquetes paquetes;
   late _FakeRealtime realtime;
 
   ClientePedidosCubit build({Duration successDelay = Duration.zero}) =>
@@ -79,6 +93,7 @@ void main() {
         catalogoRepository: catalogo,
         pedidoRepository: pedidos,
         facturaRepository: facturas,
+        paqueteRepository: paquetes,
         realtime: realtime,
         successDelay: successDelay,
       );
@@ -91,7 +106,9 @@ void main() {
     catalogo = _MockCatalogo();
     pedidos = _MockPedidos();
     facturas = _MockFacturas();
+    paquetes = _MockPaquetes();
     realtime = _FakeRealtime();
+    when(() => paquetes.getDisponibles()).thenAnswer((_) async => const []);
     when(() => catalogo.getCategorias()).thenAnswer((_) async => [_categoria]);
     when(
       () => catalogo.getPlatos(

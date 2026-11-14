@@ -10,7 +10,7 @@ import 'package:mocktail/mocktail.dart';
 
 class _MockPedidoRepository extends Mock implements PedidoRepository {}
 
-class _FakeRealtime implements RealtimeService {
+class _FakeRealtime extends RealtimeService {
   final Map<String, StreamController<Pedido>> controllers = {};
   int connectCalls = 0;
   int disconnectCalls = 0;

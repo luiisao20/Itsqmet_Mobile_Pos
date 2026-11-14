@@ -9,6 +9,7 @@ void registerClientePedidosDependencies(GetIt getIt) {
       catalogoRepository: getIt<CatalogoRepository>(),
       pedidoRepository: getIt<PedidoRepository>(),
       facturaRepository: getIt<FacturaRepository>(),
+      paqueteRepository: getIt<PaqueteSorpresaRepository>(),
       realtime: getIt<RealtimeService>(),
     ),
   );

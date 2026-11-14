@@ -11,5 +11,6 @@ export 'package:itsqmet_mobile_pos/data/domain/entities/usuario.dart';
 export 'package:itsqmet_mobile_pos/data/domain/entities/cliente.dart';
 export 'package:itsqmet_mobile_pos/data/domain/entities/insumo.dart';
 export 'package:itsqmet_mobile_pos/data/domain/entities/distribuidor.dart';
+export 'package:itsqmet_mobile_pos/data/domain/entities/paquete_sorpresa.dart';
 export 'package:itsqmet_mobile_pos/data/domain/entities/page_result.dart';
 export 'package:itsqmet_mobile_pos/data/domain/entities/drafts/drafts.dart';

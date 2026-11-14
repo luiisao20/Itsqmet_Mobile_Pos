@@ -8,6 +8,7 @@ export 'package:itsqmet_mobile_pos/data/infrastructure/models/insumo_model.dart'
 export 'package:itsqmet_mobile_pos/data/infrastructure/models/mesa_model.dart';
 export 'package:itsqmet_mobile_pos/data/infrastructure/models/pago_model.dart';
 export 'package:itsqmet_mobile_pos/data/infrastructure/models/page_parser.dart';
+export 'package:itsqmet_mobile_pos/data/infrastructure/models/paquete_sorpresa_model.dart';
 export 'package:itsqmet_mobile_pos/data/infrastructure/models/pedido_model.dart';
 export 'package:itsqmet_mobile_pos/data/infrastructure/models/plato_model.dart';
 export 'package:itsqmet_mobile_pos/data/infrastructure/models/usuario_model.dart';

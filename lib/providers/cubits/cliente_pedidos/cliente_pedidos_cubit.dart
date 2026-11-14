@@ -11,6 +11,7 @@ class ClientePedidosCubit extends Cubit<ClientePedidosState> {
     required this._catalogoRepository,
     required this._pedidoRepository,
     required this._facturaRepository,
+    required this._paqueteRepository,
     required this._realtime,
     this._successDelay = defaultSuccessDelay,
   }) : super(const ClientePedidosState());
@@ -24,10 +25,14 @@ class ClientePedidosCubit extends Cubit<ClientePedidosState> {
   final CatalogoRepository _catalogoRepository;
   final PedidoRepository _pedidoRepository;
   final FacturaRepository _facturaRepository;
+  final PaqueteSorpresaRepository _paqueteRepository;
   final RealtimeService _realtime;
   final Duration _successDelay;
+
   StreamSubscription<Pedido>? _subscription;
+  StreamSubscription<PaqueteSorpresa>? _paquetesSubscription;
   Timer? _successTimer;
+  Timer? _countdownTimer;
   int _errorSequence = 0;
 
   Future<void> load() async {
@@ -37,6 +42,7 @@ class ClientePedidosCubit extends Cubit<ClientePedidosState> {
       _loadPlatos(),
       loadMisPedidos(),
       loadMisFacturas(),
+      loadPaquetes(),
     ]);
   }
 
@@ -95,6 +101,49 @@ class ClientePedidosCubit extends Cubit<ClientePedidosState> {
     }
   }
 
+  Future<void> loadPaquetes() async {
+    emit(state.copyWith(loadingPaquetes: true));
+    try {
+      final paquetes = await _paqueteRepository.getDisponibles();
+      if (isClosed) return;
+      emit(state.copyWith(loadingPaquetes: false, paquetes: paquetes));
+      _startCountdownTimer();
+    } on AppException {
+      if (isClosed) return;
+      emit(state.copyWith(loadingPaquetes: false));
+    }
+  }
+
+  void _startCountdownTimer() {
+    _countdownTimer?.cancel();
+    final hasCountdowns = state.paquetes.any((p) => p.segundosParaApertura > 0);
+    if (!hasCountdowns) return;
+
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (isClosed) {
+        _countdownTimer?.cancel();
+        return;
+      }
+      bool anyRemaining = false;
+      final updated = state.paquetes.map((p) {
+        if (p.segundosParaApertura > 0) {
+          final next = p.segundosParaApertura - 1;
+          if (next > 0) anyRemaining = true;
+          return p.copyWith(
+            segundosParaApertura: next,
+            disponibleAhora: next == 0 ? true : p.disponibleAhora,
+          );
+        }
+        return p;
+      }).toList();
+
+      emit(state.copyWith(paquetes: updated));
+      if (!anyRemaining) {
+        _countdownTimer?.cancel();
+      }
+    });
+  }
+
   Future<void> filterCategoria(int? idCategoria) {
     emit(state.copyWith(selectedCategoriaId: () => idCategoria));
     return _loadPlatos();
@@ -103,6 +152,8 @@ class ClientePedidosCubit extends Cubit<ClientePedidosState> {
   Future<void> changeTab(ClienteTab tab) async {
     emit(state.copyWith(tab: tab));
     switch (tab) {
+      case ClienteTab.paquetes:
+        await loadPaquetes();
       case ClienteTab.historial:
         await loadMisPedidos();
       case ClienteTab.facturas:
@@ -168,6 +219,50 @@ class ClientePedidosCubit extends Cubit<ClientePedidosState> {
     }
   }
 
+  Future<bool> rescatarPaquete(
+    int id, {
+    int cantidad = 1,
+    String? observaciones,
+  }) async {
+    if (state.rescatandoPaqueteId != null) return false;
+    emit(state.copyWith(
+      rescatandoPaqueteId: () => id,
+      successMessage: () => null,
+    ));
+
+    try {
+      final result = await _paqueteRepository.rescatar(
+        id,
+        cantidad: cantidad,
+        observaciones: observaciones,
+      );
+      if (isClosed) return false;
+      emit(
+        state.copyWith(
+          rescatandoPaqueteId: () => null,
+          successMessage: () => result.mensaje,
+        ),
+      );
+      unawaited(loadMisPedidos());
+      unawaited(loadPaquetes());
+      _successTimer?.cancel();
+      _successTimer = Timer(_successDelay, _showHistorial);
+      return true;
+    } on AppException catch (error) {
+      if (isClosed) return false;
+      final message = error.message.trim().isEmpty
+          ? 'Error al rescatar el paquete sorpresa.'
+          : error.message;
+      emit(
+        state.copyWith(
+          rescatandoPaqueteId: () => null,
+          error: ClientePedidosError(++_errorSequence, message),
+        ),
+      );
+      return false;
+    }
+  }
+
   void _showHistorial() {
     if (isClosed) return;
     emit(state.copyWith(tab: ClienteTab.historial, successMessage: () => null));
@@ -177,6 +272,8 @@ class ClientePedidosCubit extends Cubit<ClientePedidosState> {
     if (_subscription != null) return;
     _realtime.connect();
     _subscription = _realtime.pedidos.listen(_handleIncoming);
+    _paquetesSubscription =
+        _realtime.paquetesSorpresa.listen(_handleIncomingPaquete);
   }
 
   void _handleIncoming(Pedido pedido) {
@@ -192,11 +289,25 @@ class ClientePedidosCubit extends Cubit<ClientePedidosState> {
     );
   }
 
+  void _handleIncomingPaquete(PaqueteSorpresa paquete) {
+    if (isClosed) return;
+    final exists = state.paquetes.any((item) => item.id == paquete.id);
+    final updatedList = exists
+        ? [for (final p in state.paquetes) p.id == paquete.id ? paquete : p]
+        : [...state.paquetes, paquete];
+    emit(state.copyWith(paquetes: updatedList));
+    _startCountdownTimer();
+  }
+
   @override
   Future<void> close() async {
+    _countdownTimer?.cancel();
     _successTimer?.cancel();
     final subscription = _subscription;
     _subscription = null;
+    final paquetesSub = _paquetesSubscription;
+    _paquetesSubscription = null;
+    await paquetesSub?.cancel();
     if (subscription != null) {
       await subscription.cancel();
       await _realtime.disconnect();
