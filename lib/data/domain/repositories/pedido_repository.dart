@@ -14,6 +14,7 @@ abstract interface class PedidoRepository {
     EstadoPedido? estado,
     TipoPedido? tipo,
     int? idMesa,
+    String? clienteUuid,
     int size = 50,
   });
 

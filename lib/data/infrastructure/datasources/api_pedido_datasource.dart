@@ -37,6 +37,7 @@ class ApiPedidoDatasource implements PedidoDatasource {
     EstadoPedido? estado,
     TipoPedido? tipo,
     int? idMesa,
+    String? clienteUuid,
     int size = 50,
   }) async {
     final response = await _dio.get<dynamic>(
@@ -46,6 +47,7 @@ class ApiPedidoDatasource implements PedidoDatasource {
         if (estado != null) 'estado': estado.toJson(),
         if (tipo != null) 'tipo': tipo.toJson(),
         'idMesa': ?idMesa,
+        'clienteUuid': ?clienteUuid,
       },
     );
     return parsePage(response.data, PedidoModel.fromJson);

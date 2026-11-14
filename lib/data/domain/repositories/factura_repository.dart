@@ -7,6 +7,13 @@ import 'package:itsqmet_mobile_pos/data/domain/entities/page_result.dart';
 abstract interface class FacturaRepository {
   Future<PageResult<Factura>> getFacturas({int page = 0, int size = 10});
 
+  Future<PageResult<Factura>> searchFacturas({
+    String? clienteFiltro,
+    String? secuencial,
+    int page = 0,
+    int size = 50,
+  });
+
   Future<Factura> getFactura(int id);
 
   Future<PageResult<Factura>> getMisFacturas({int page = 0, int size = 50});

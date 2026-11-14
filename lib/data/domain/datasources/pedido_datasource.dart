@@ -12,6 +12,7 @@ abstract interface class PedidoDatasource {
     EstadoPedido? estado,
     TipoPedido? tipo,
     int? idMesa,
+    String? clienteUuid,
     int size = 50,
   });
 

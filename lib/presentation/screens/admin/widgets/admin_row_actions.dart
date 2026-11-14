@@ -14,10 +14,14 @@ Future<bool> confirmAdminDelete(BuildContext context, String message) =>
 class AdminRowActions extends StatelessWidget {
   const AdminRowActions({
     super.key,
+    this.onView,
+    this.viewLabel = 'Historial',
     required this.onEdit,
     required this.onDelete,
   });
 
+  final VoidCallback? onView;
+  final String viewLabel;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
@@ -26,6 +30,16 @@ class AdminRowActions extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
+        if (onView != null) ...[
+          _ActionChip(
+            label: viewLabel,
+            background: AppColors.blue100,
+            pressed: AppColors.blue800.withValues(alpha: 0.2),
+            foreground: AppColors.blue800,
+            onTap: onView!,
+          ),
+          AppSpacing.w4,
+        ],
         _ActionChip(
           label: 'Editar',
           background: AppColors.emerald50,

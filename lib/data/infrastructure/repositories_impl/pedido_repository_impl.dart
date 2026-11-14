@@ -32,12 +32,14 @@ class PedidoRepositoryImpl implements PedidoRepository {
     EstadoPedido? estado,
     TipoPedido? tipo,
     int? idMesa,
+    String? clienteUuid,
     int size = 50,
   }) => ErrorMapper.guard(() async {
     final result = await _datasource.searchPedidos(
       estado: estado,
       tipo: tipo,
       idMesa: idMesa,
+      clienteUuid: clienteUuid,
       size: size,
     );
     return result.map(PedidoMapper.toEntity);

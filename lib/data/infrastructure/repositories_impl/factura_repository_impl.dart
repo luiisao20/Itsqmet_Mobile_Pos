@@ -24,6 +24,22 @@ class FacturaRepositoryImpl implements FacturaRepository {
       });
 
   @override
+  Future<PageResult<Factura>> searchFacturas({
+    String? clienteFiltro,
+    String? secuencial,
+    int page = 0,
+    int size = 50,
+  }) => ErrorMapper.guard(() async {
+    final result = await _datasource.searchFacturas(
+      clienteFiltro: clienteFiltro,
+      secuencial: secuencial,
+      page: page,
+      size: size,
+    );
+    return result.map(FacturaMapper.toEntity);
+  });
+
+  @override
   Future<Factura> getFactura(int id) => ErrorMapper.guard(
     () async => FacturaMapper.toEntity(await _datasource.getFactura(id)),
   );

@@ -5,6 +5,13 @@ import 'package:itsqmet_mobile_pos/data/infrastructure/models/pago_model.dart';
 abstract interface class FacturaDatasource {
   Future<PageResult<FacturaModel>> getFacturas({int page = 0, int size = 10});
 
+  Future<PageResult<FacturaModel>> searchFacturas({
+    String? clienteFiltro,
+    String? secuencial,
+    int page = 0,
+    int size = 50,
+  });
+
   Future<FacturaModel> getFactura(int id);
 
   Future<PageResult<FacturaModel>> getMisFacturas({

@@ -25,5 +25,12 @@ void registerAdminPersonasDependencies(GetIt getIt) {
         clienteRepository: getIt<ClienteRepository>(),
         changes: getIt<AdminChanges>(),
       ),
+    )
+    ..registerFactoryParam<AdminClienteDetalleCubit, Cliente, void>(
+      (cliente, _) => AdminClienteDetalleCubit(
+        cliente: cliente,
+        pedidoRepository: getIt<PedidoRepository>(),
+        facturaRepository: getIt<FacturaRepository>(),
+      ),
     );
 }

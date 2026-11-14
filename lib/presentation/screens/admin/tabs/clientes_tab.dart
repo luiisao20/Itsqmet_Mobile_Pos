@@ -5,6 +5,7 @@ import 'package:itsqmet_mobile_pos/presentation/screens/admin/widgets/admin_crud
 import 'package:itsqmet_mobile_pos/presentation/screens/admin/widgets/admin_form_modal.dart';
 import 'package:itsqmet_mobile_pos/presentation/screens/admin/widgets/admin_row_actions.dart';
 import 'package:itsqmet_mobile_pos/presentation/screens/admin/widgets/admin_table_card.dart';
+import 'package:itsqmet_mobile_pos/presentation/screens/admin/widgets/cliente_detalle_modal.dart';
 import 'package:itsqmet_mobile_pos/presentation/widgets/composite/responsive_data_table.dart';
 import 'package:itsqmet_mobile_pos/presentation/widgets/inputs/app_dropdown_field.dart';
 import 'package:itsqmet_mobile_pos/presentation/widgets/inputs/app_text_field.dart';
@@ -98,6 +99,7 @@ class ClientesView extends StatelessWidget {
             label: 'Acciones',
             alignEnd: true,
             cellBuilder: (context, cliente) => AdminRowActions(
+              onView: () => showClienteDetalleModal(context, cliente),
               onEdit: () => _openForm(context, cliente: cliente),
               onDelete: () => _delete(context, cliente),
             ),

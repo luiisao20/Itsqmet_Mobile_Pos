@@ -27,6 +27,27 @@ class ApiFacturaDatasource implements FacturaDatasource {
   }
 
   @override
+  Future<PageResult<FacturaModel>> searchFacturas({
+    String? clienteFiltro,
+    String? secuencial,
+    int page = 0,
+    int size = 50,
+  }) async {
+    final response = await _dio.get<dynamic>(
+      '$_facturas/buscar',
+      queryParameters: {
+        'page': page,
+        'size': size,
+        if (clienteFiltro != null && clienteFiltro.trim().isNotEmpty)
+          'clienteFiltro': clienteFiltro.trim(),
+        if (secuencial != null && secuencial.trim().isNotEmpty)
+          'secuencial': secuencial.trim(),
+      },
+    );
+    return parsePage(response.data, FacturaModel.fromJson);
+  }
+
+  @override
   Future<FacturaModel> getFactura(int id) async {
     final response = await _dio.get<dynamic>('$_facturas/$id');
     return FacturaModel.fromJson(asJsonMap(response.data));
