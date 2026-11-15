@@ -16,6 +16,7 @@ import 'package:itsqmet_mobile_pos/presentation/screens/cocina/cocina_screen.dar
 import 'package:itsqmet_mobile_pos/presentation/screens/home/home_screen.dart';
 import 'package:itsqmet_mobile_pos/presentation/screens/mesas/mesas_screen.dart';
 import 'package:itsqmet_mobile_pos/presentation/screens/not_found/no_page_found_screen.dart';
+import 'package:itsqmet_mobile_pos/providers/cubits/cliente_pedidos/cliente_pedidos.dart';
 import 'package:material_ui/material_ui.dart';
 
 typedef ScreenBuilder = Widget Function(AppRoute route);
@@ -59,7 +60,14 @@ GoRouter createAppRouter({
 GoRoute _route(AppRoute route, ScreenBuilder screenBuilder) => GoRoute(
   path: route.path,
   name: route.name,
-  builder: (context, state) => screenBuilder(route),
+  builder: (context, state) {
+    if (route == AppRoutes.clientePedidos && screenBuilder == screenFor) {
+      final tabParam = state.uri.queryParameters['tab'];
+      final initialTab = tabParam == 'paquetes' ? ClienteTab.paquetes : null;
+      return ClientePedidosScreen(initialTab: initialTab);
+    }
+    return screenBuilder(route);
+  },
 );
 
 FutureOr<String?> _redirect(GetIt services, GoRouterState state) {

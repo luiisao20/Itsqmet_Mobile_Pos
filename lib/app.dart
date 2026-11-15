@@ -1,6 +1,6 @@
 import 'package:go_router/go_router.dart';
-import 'package:itsqmet_mobile_pos/config/router/app_router.dart';
 import 'package:itsqmet_mobile_pos/config/theme/theme.dart';
+import 'package:itsqmet_mobile_pos/services/locator/service_locator.dart';
 import 'package:itsqmet_mobile_pos/services/notifications_service.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -14,7 +14,7 @@ class App extends StatefulWidget {
 }
 
 class _AppState extends State<App> {
-  late final GoRouter _router = widget.router ?? createAppRouter();
+  late final GoRouter _router = widget.router ?? getIt<GoRouter>();
 
   @override
   void dispose() {

@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "412165008781",
+    "project_id": "expo-push-notifications-1c7e1",
+    "storage_bucket": "expo-push-notifications-1c7e1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:412165008781:android:127d9c48e03cd6796561c4",
+        "android_client_info": {
+          "package_name": "com.example.itsqmet_mobile_pos"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDoF_tRLxuGixwFYS8RFycttsh91hS4HsM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:412165008781:android:46e31abe15c855666561c4",
+        "android_client_info": {
+          "package_name": "com.luiisao20.pushapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDoF_tRLxuGixwFYS8RFycttsh91hS4HsM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

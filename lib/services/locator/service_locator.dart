@@ -9,11 +9,14 @@ import 'package:itsqmet_mobile_pos/services/locator/data_locator.dart';
 import 'package:itsqmet_mobile_pos/services/locator/home_locator.dart';
 import 'package:itsqmet_mobile_pos/services/locator/mesas_locator.dart';
 import 'package:itsqmet_mobile_pos/services/locator/router_locator.dart';
+import 'package:itsqmet_mobile_pos/services/push_notification_service.dart';
 
 final GetIt getIt = GetIt.instance;
 
 Future<void> setupLocator([GetIt? locator]) async {
   final services = locator ?? getIt;
+
+  services.registerLazySingleton<PushNotificationService>(PushNotificationService.new);
 
   registerDataDependencies(services);
   registerRouterDependencies(services);

@@ -13,12 +13,19 @@ import 'package:itsqmet_mobile_pos/services/notifications_service.dart';
 import 'package:material_ui/material_ui.dart';
 
 class ClientePedidosScreen extends StatelessWidget {
-  const ClientePedidosScreen({super.key});
+  final ClienteTab? initialTab;
+  const ClientePedidosScreen({super.key, this.initialTab});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider<ClientePedidosCubit>(
-      create: (_) => getIt<ClientePedidosCubit>()..load(),
+      create: (_) {
+        final cubit = getIt<ClientePedidosCubit>()..load();
+        if (initialTab != null) {
+          cubit.changeTab(initialTab!);
+        }
+        return cubit;
+      },
       child: const ClientePedidosView(),
     );
   }
