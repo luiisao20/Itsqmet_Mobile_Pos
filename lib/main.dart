@@ -3,6 +3,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:itsqmet_mobile_pos/app.dart';
 import 'package:itsqmet_mobile_pos/config/constants/app_environment.dart';
 import 'package:itsqmet_mobile_pos/firebase_options.dart';
+import 'package:itsqmet_mobile_pos/providers/cubits/notificaciones/notificaciones.dart';
 import 'package:itsqmet_mobile_pos/services/locator/service_locator.dart';
 import 'package:itsqmet_mobile_pos/services/push_notification_service.dart';
 import 'package:material_ui/material_ui.dart';
@@ -32,6 +33,9 @@ Future<void> main() async {
   } catch (error) {
     debugPrint('[FCM] Error inicializando servicio de push notifications: $error');
   }
+
+  // Staff order alerts follow the session for the whole app process.
+  getIt<OrderAlertsCubit>();
 
   runApp(const App());
 }

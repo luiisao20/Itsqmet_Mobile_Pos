@@ -21,7 +21,9 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 class PushNotificationService {
   static const String topicPaquetes = 'paquetes_sorpresa';
 
-  final FirebaseMessaging _fcm = FirebaseMessaging.instance;
+  // Lazy so the service can be created even when Firebase failed to start;
+  // local notifications do not depend on it.
+  late final FirebaseMessaging _fcm = FirebaseMessaging.instance;
   final FlutterLocalNotificationsPlugin _localNotifications = FlutterLocalNotificationsPlugin();
 
   static const AndroidNotificationChannel _channel = AndroidNotificationChannel(
@@ -31,6 +33,15 @@ class PushNotificationService {
     importance: Importance.high,
     playSound: true,
   );
+
+  static const AndroidNotificationChannel _pedidosChannel =
+      AndroidNotificationChannel(
+        'pedidos_channel',
+        'Pedidos',
+        description: 'Avisos de nuevos pedidos para el personal',
+        importance: Importance.high,
+        playSound: true,
+      );
 
   Future<void> initialize() async {
     try {
@@ -77,6 +88,7 @@ class PushNotificationService {
 
     if (androidPlugin != null) {
       await androidPlugin.createNotificationChannel(_channel);
+      await androidPlugin.createNotificationChannel(_pedidosChannel);
       await androidPlugin.requestNotificationsPermission();
     }
 
@@ -122,13 +134,41 @@ class PushNotificationService {
     }
   }
 
+  /// Shows a new-order alert for staff; tapping it opens the kitchen screen.
+  Future<void> showOrderNotification({
+    required int id,
+    required String title,
+    required String body,
+  }) async {
+    try {
+      await _localNotifications.show(
+        id,
+        title,
+        body,
+        NotificationDetails(
+          android: AndroidNotificationDetails(
+            _pedidosChannel.id,
+            _pedidosChannel.name,
+            channelDescription: _pedidosChannel.description,
+            importance: Importance.high,
+            priority: Priority.high,
+            icon: '@mipmap/ic_launcher',
+          ),
+        ),
+        payload: jsonEncode(const {'route': '/cocina', 'tab': ''}),
+      );
+    } catch (e) {
+      debugPrint('[Notificaciones] Error mostrando aviso de pedido: $e');
+    }
+  }
+
   void _processNotificationData(Map<String, dynamic> data) {
     debugPrint('[FCM] Procesando payload: $data');
     final tab = data['tab']?.toString() ?? 'paquetes';
     final route = data['route']?.toString() ?? '/cliente/pedidos';
 
     try {
-      final target = '$route?tab=$tab';
+      final target = tab.isEmpty ? route : '$route?tab=$tab';
       debugPrint('[FCM] Redirigiendo a: $target');
       if (getIt.isRegistered<GoRouter>()) {
         getIt<GoRouter>().go(target);

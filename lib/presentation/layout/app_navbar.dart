@@ -11,19 +11,29 @@ import 'package:itsqmet_mobile_pos/presentation/layout/app_logo.dart';
 import 'package:itsqmet_mobile_pos/presentation/widgets/badges/app_badge.dart';
 import 'package:itsqmet_mobile_pos/providers/cubits/auth/auth_cubit.dart';
 import 'package:itsqmet_mobile_pos/providers/cubits/auth/auth_state.dart';
+import 'package:itsqmet_mobile_pos/providers/cubits/notificaciones/notificaciones.dart';
 import 'package:material_ui/material_ui.dart';
 
 class AppNavbar extends StatelessWidget implements PreferredSizeWidget {
-  const AppNavbar({super.key, this.actions = const [], this.authCubit});
+  const AppNavbar({
+    super.key,
+    this.actions = const [],
+    this.authCubit,
+    this.orderAlerts,
+  });
 
   final List<Widget> actions;
 
   final AuthCubit? authCubit;
 
+  final OrderAlertsCubit? orderAlerts;
+
   static const double height = 64;
 
   static const Key userMenuKey = ValueKey('navbar-user-menu');
   static const Key mobileMenuKey = ValueKey('navbar-mobile-menu');
+  static const Key kitchenBadgeKey = ValueKey('navbar-kitchen-badge');
+  static const Key menuBadgeKey = ValueKey('navbar-menu-badge');
 
   static const double _sessionAreaMaxFraction = 0.45;
 
@@ -36,10 +46,19 @@ class AppNavbar extends StatelessWidget implements PreferredSizeWidget {
     return getIt.isRegistered<AuthCubit>() ? getIt<AuthCubit>() : null;
   }
 
+  OrderAlertsCubit? _resolveOrderAlerts() {
+    if (orderAlerts != null) return orderAlerts;
+    final getIt = GetIt.instance;
+    return getIt.isRegistered<OrderAlertsCubit>()
+        ? getIt<OrderAlertsCubit>()
+        : null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final auth = _resolveAuth();
     if (auth == null) return _NavbarFrame(children: _withActions(const []));
+    final alerts = _resolveOrderAlerts();
 
     return BlocBuilder<AuthCubit, AuthState>(
       bloc: auth,
@@ -63,6 +82,12 @@ class AppNavbar extends StatelessWidget implements PreferredSizeWidget {
                           child: _DesktopLink(
                             link: link,
                             active: link.isActive(path),
+                            trailing: link.route == AppRoutes.cocina
+                                ? _UnseenOrdersBadge(
+                                    alerts: alerts,
+                                    badgeKey: AppNavbar.kitchenBadgeKey,
+                                  )
+                                : null,
                           ),
                         ),
                     ],
@@ -84,8 +109,12 @@ class AppNavbar extends StatelessWidget implements PreferredSizeWidget {
               const Spacer(),
               IconButton(
                 tooltip: 'Menú',
-                onPressed: () => _showMobileMenu(context, auth),
-                icon: const Icon(Icons.menu, color: AppColors.gray600),
+                onPressed: () => _showMobileMenu(context, auth, alerts),
+                icon: _UnseenOrdersBadge(
+                  alerts: alerts,
+                  badgeKey: AppNavbar.menuBadgeKey,
+                  child: const Icon(Icons.menu, color: AppColors.gray600),
+                ),
               ),
             ],
           ]),
@@ -204,10 +233,11 @@ class _NavLink {
 }
 
 class _DesktopLink extends StatelessWidget {
-  const _DesktopLink({required this.link, required this.active});
+  const _DesktopLink({required this.link, required this.active, this.trailing});
 
   final _NavLink link;
   final bool active;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -244,10 +274,51 @@ class _DesktopLink extends StatelessWidget {
                   fontWeight: active ? FontWeight.w600 : FontWeight.w400,
                 ),
               ),
+              ?trailing,
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Count of new orders not seen in the kitchen yet. Wraps [child] when given,
+/// otherwise shows the count on its own. Nothing is shown at zero.
+class _UnseenOrdersBadge extends StatelessWidget {
+  const _UnseenOrdersBadge({
+    required this.alerts,
+    required this.badgeKey,
+    this.child,
+  });
+
+  final OrderAlertsCubit? alerts;
+  final Key badgeKey;
+  final Widget? child;
+
+  @override
+  Widget build(BuildContext context) {
+    final cubit = alerts;
+    final fallback = child ?? const SizedBox.shrink();
+    if (cubit == null) return fallback;
+    return BlocBuilder<OrderAlertsCubit, OrderAlertsState>(
+      bloc: cubit,
+      buildWhen: (previous, current) => previous.unseen != current.unseen,
+      builder: (context, state) {
+        if (state.unseen == 0) return fallback;
+        final badge = Badge.count(
+          key: badgeKey,
+          count: state.unseen,
+          backgroundColor: AppColors.rose600,
+          textColor: AppColors.white,
+          child: child,
+        );
+        if (child != null) return badge;
+        return Padding(
+          padding: const EdgeInsetsDirectional.only(start: 6),
+          child: badge,
+        );
+      },
     );
   }
 }
@@ -508,7 +579,11 @@ Future<void> _logoutAndGoToLogin(BuildContext context, AuthCubit auth) async {
   router?.go(AppRoutes.login.path);
 }
 
-Future<void> _showMobileMenu(BuildContext context, AuthCubit auth) {
+Future<void> _showMobileMenu(
+  BuildContext context,
+  AuthCubit auth,
+  OrderAlertsCubit? alerts,
+) {
   final router = GoRouter.maybeOf(context);
   final top = MediaQuery.paddingOf(context).top + AppNavbar.height;
   return showGeneralDialog<void>(
@@ -532,6 +607,7 @@ Future<void> _showMobileMenu(BuildContext context, AuthCubit auth) {
             child: _MobileMenu(
               key: AppNavbar.mobileMenuKey,
               auth: auth,
+              alerts: alerts,
               onNavigate: go,
               onLogout: () async {
                 close();
@@ -550,11 +626,13 @@ class _MobileMenu extends StatelessWidget {
   const _MobileMenu({
     super.key,
     required this.auth,
+    required this.alerts,
     required this.onNavigate,
     required this.onLogout,
   });
 
   final AuthCubit auth;
+  final OrderAlertsCubit? alerts;
   final ValueChanged<String> onNavigate;
   final VoidCallback onLogout;
 
@@ -586,6 +664,12 @@ class _MobileMenu extends StatelessWidget {
                   label: link.label,
                   icon: link.icon,
                   onTap: () => onNavigate(link.route.path),
+                  trailing: link.route == AppRoutes.cocina
+                      ? _UnseenOrdersBadge(
+                          alerts: alerts,
+                          badgeKey: AppNavbar.kitchenBadgeKey,
+                        )
+                      : null,
                 ),
               AppSpacing.h4,
               Container(
@@ -659,6 +743,7 @@ class _MobileEntry extends StatelessWidget {
     this.icon,
     this.color = AppColors.gray700,
     this.bold = false,
+    this.trailing,
   });
 
   final String label;
@@ -666,6 +751,7 @@ class _MobileEntry extends StatelessWidget {
   final IconData? icon;
   final Color color;
   final bool bold;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -694,6 +780,7 @@ class _MobileEntry extends StatelessWidget {
                 ),
               ),
             ),
+            ?trailing,
           ],
         ),
       ),

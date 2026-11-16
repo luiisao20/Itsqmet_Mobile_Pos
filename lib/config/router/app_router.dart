@@ -7,6 +7,7 @@ import 'package:itsqmet_mobile_pos/config/router/app_routes.dart';
 import 'package:itsqmet_mobile_pos/config/router/route_guard.dart';
 import 'package:itsqmet_mobile_pos/config/router/router_refresh_notifier.dart';
 import 'package:itsqmet_mobile_pos/presentation/layout/app_shell.dart';
+import 'package:itsqmet_mobile_pos/presentation/layout/kitchen_alerts_scope.dart';
 import 'package:itsqmet_mobile_pos/presentation/screens/admin/admin_screen.dart';
 import 'package:itsqmet_mobile_pos/presentation/screens/auth/login_screen.dart';
 import 'package:itsqmet_mobile_pos/presentation/screens/auth/register_screen.dart';
@@ -17,6 +18,7 @@ import 'package:itsqmet_mobile_pos/presentation/screens/home/home_screen.dart';
 import 'package:itsqmet_mobile_pos/presentation/screens/mesas/mesas_screen.dart';
 import 'package:itsqmet_mobile_pos/presentation/screens/not_found/no_page_found_screen.dart';
 import 'package:itsqmet_mobile_pos/providers/cubits/cliente_pedidos/cliente_pedidos.dart';
+import 'package:itsqmet_mobile_pos/providers/cubits/notificaciones/notificaciones.dart';
 import 'package:material_ui/material_ui.dart';
 
 typedef ScreenBuilder = Widget Function(AppRoute route);
@@ -50,25 +52,37 @@ GoRouter createAppRouter({
       ShellRoute(
         builder: (context, state, child) => AppShell(child: child),
         routes: [
-          for (final route in AppRoutes.all) _route(route, screenBuilder),
+          for (final route in AppRoutes.all)
+            _route(route, screenBuilder, services),
         ],
       ),
     ],
   );
 }
 
-GoRoute _route(AppRoute route, ScreenBuilder screenBuilder) => GoRoute(
-  path: route.path,
-  name: route.name,
-  builder: (context, state) {
-    if (route == AppRoutes.clientePedidos && screenBuilder == screenFor) {
-      final tabParam = state.uri.queryParameters['tab'];
-      final initialTab = tabParam == 'paquetes' ? ClienteTab.paquetes : null;
-      return ClientePedidosScreen(initialTab: initialTab);
-    }
-    return screenBuilder(route);
-  },
-);
+GoRoute _route(AppRoute route, ScreenBuilder screenBuilder, GetIt services) =>
+    GoRoute(
+      path: route.path,
+      name: route.name,
+      builder: (context, state) {
+        if (route == AppRoutes.clientePedidos && screenBuilder == screenFor) {
+          final tabParam = state.uri.queryParameters['tab'];
+          final initialTab = tabParam == 'paquetes'
+              ? ClienteTab.paquetes
+              : null;
+          return ClientePedidosScreen(initialTab: initialTab);
+        }
+        final screen = screenBuilder(route);
+        if (route == AppRoutes.cocina &&
+            services.isRegistered<OrderAlertsCubit>()) {
+          return KitchenAlertsScope(
+            alerts: services<OrderAlertsCubit>(),
+            child: screen,
+          );
+        }
+        return screen;
+      },
+    );
 
 FutureOr<String?> _redirect(GetIt services, GoRouterState state) {
   final request = RouteRequest(
