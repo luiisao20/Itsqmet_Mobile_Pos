@@ -5,6 +5,7 @@ import 'package:get_it/get_it.dart';
 import 'package:itsqmet_mobile_pos/config/router/route_guard_auth.dart';
 import 'package:itsqmet_mobile_pos/config/router/router.dart';
 import 'package:itsqmet_mobile_pos/data/domain/domain.dart';
+import 'package:itsqmet_mobile_pos/providers/cubits/notificaciones/notificaciones.dart';
 import 'package:itsqmet_mobile_pos/services/locator/admin_catalogo_locator.dart';
 import 'package:itsqmet_mobile_pos/services/locator/admin_personas_locator.dart';
 import 'package:itsqmet_mobile_pos/services/locator/auth_locator.dart';
@@ -33,6 +34,7 @@ void main() {
 
     expect(services.isRegistered<AuthRepository>(), isTrue);
     expect(services.isRegistered<PedidoRepository>(), isTrue);
+    expect(services.isRegistered<OrderAlertsCubit>(), isTrue);
     expect(services<RouteGuard>(), isA<AuthRouteGuard>());
     expect(services<RouterRefreshNotifier>(), isA<RouterRefreshNotifier>());
     expect(

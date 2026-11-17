@@ -8,6 +8,7 @@ import 'package:itsqmet_mobile_pos/services/locator/cocina_locator.dart';
 import 'package:itsqmet_mobile_pos/services/locator/data_locator.dart';
 import 'package:itsqmet_mobile_pos/services/locator/home_locator.dart';
 import 'package:itsqmet_mobile_pos/services/locator/mesas_locator.dart';
+import 'package:itsqmet_mobile_pos/services/locator/notificaciones_locator.dart';
 import 'package:itsqmet_mobile_pos/services/locator/router_locator.dart';
 import 'package:itsqmet_mobile_pos/services/push_notification_service.dart';
 
@@ -29,4 +30,5 @@ Future<void> setupLocator([GetIt? locator]) async {
   registerCajaDependencies(services);
   registerAdminCatalogoDependencies(services);
   registerAdminPersonasDependencies(services);
+  registerNotificacionesDependencies(services);
 }
